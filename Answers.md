@@ -12,6 +12,9 @@ Se agrega la bandera -msee[ver] al comando de compilación. Donde ver es la vers
 
 * ¿Qué importancia tienen la definición de variables y el alineamiento de memoria al trabajar con un set SIMD vectorial, como SSE?
 
+La definición indica el tipo de datos que se va a manejar, por lo que puede causar mal interpretaciones de los datos.
+El alineamiento de memoria presenta un problema similar, pues un error de alineamiento puede llevar a la corrupción de datos o malinterpretación de estos.
+
 # Problemas Prácticos
 
 ## Respuestas

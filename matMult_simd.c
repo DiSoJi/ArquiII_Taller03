@@ -5,64 +5,47 @@
 
 #include <stdio.h>
 
-int main(){
-    __m128 row1_A = _mm_set_ps (1, 1, 1, 1);
-    __m128 row2_A = _mm_set_ps (1, 1, 1, 1);
-    __m128 row3_A = _mm_set_ps (1, 1, 1, 1);
-    __m128 row4_A = _mm_set_ps (1, 1, 1, 1);
+int main()
+{
 
-    __m128 colum1_B = _mm_set_ps (1, 1, 1, 1);
-    __m128 colum2_B = _mm_set_ps (1, 1, 1, 1);
-    __m128 colum3_B = _mm_set_ps (1, 1, 1, 1);
-    __m128 colum4_B = _mm_set_ps (1, 1, 1, 1);
+    // Three matrices to handle the original values and outputs not in __m128 data type
+    float a[4][4] = { {1.2, 1.2, 1.2, 1.2}, {2.0, 2.0, 2.0, 2.0}, {3.0, 3.0, 3.0, 3.0}, {4.0, 4.0, 4.0, 4.0} };
+    float b[4][4] = { {5.2, 5.2, 5.2, 5.2}, {6.0, 6.0, 6.0, 6.0}, {7.0, 7.0, 7.0, 7.0}, {8.0, 8.0, 8.0, 8.0} };
+    float c[4][4] = { {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0}, {0.0, 0.0, 0.0, 0.0} };
 
-    //First resulting colum
-    __m128 c1_temp = _mm_mul_ps (row1_A, colum1_B);
-    __m128 c1_temp2 = _mm_mul_ps (row2_A, colum1_B);
-    __m128 c1_temp3 = _mm_mul_ps (row3_A, colum1_B);
-    __m128 c1_temp4 = _mm_mul_ps (row4_A, colum1_B);
+    // Declaration of vectors to hanlde __m128i data type values
+    __m128 vector1;
+    __m128 vector2;
+    __m128 vector3;
 
-    //Second resulting colum
-    __m128 c2_temp = _mm_mul_ps (row1_A, colum2_B);
-    __m128 c2_temp2 = _mm_mul_ps (row2_A, colum2_B);
-    __m128 c2_temp3 = _mm_mul_ps (row3_A, colum2_B);
-    __m128 c2_temp4 = _mm_mul_ps (row4_A, colum2_B);
+    // Multiplication using two for loops. Common rowxcolum algorithm
+    for (int i = 0; i < 4; i++){
+        vector1 = _mm_set_ps(a[i][0], a[i][1], a[i][2], a[i][3]); //Sets vector1 to be each of the rows of the first matrix
+        for (int j = 0; j < 4; j++){
+            vector2 = _mm_set_ps(b[0][j], b[1][j], b[2][j], b[3][j]);//Sets vector2 to be each of the colums of second matrix
+            vector3 = _mm_mul_ps(vector1, vector2); //Multiplies each value in vector1 with the corresponding position in vector2, then saves according to position in vector3
+            //Curiously enough __mm_extract_ps doesn't extracts a float but an int instead. This due to some register stuff according to research.
+            //For that reason _mm_cvtss_f32 was used (this doesn't generate asm code but tells the data is float and should be handle like such)
+            //So __mm_shuffle_ps is uded to move the data to the lower 32 bits of the register so it can be interpreted later as the single precision float we want.
+            //And __MM_SHUFFLE is used to generate the operand for the desired value.
+            c[i][j] = _mm_cvtss_f32( _mm_shuffle_ps(vector3, vector3, _MM_SHUFFLE(0, 0, 0, 0))) 
+            +       _mm_cvtss_f32( _mm_shuffle_ps(vector3, vector3, _MM_SHUFFLE(0, 0, 0, 1))) 
+            +       _mm_cvtss_f32( _mm_shuffle_ps(vector3, vector3, _MM_SHUFFLE(0, 0, 0, 2))) 
+            +       _mm_cvtss_f32( _mm_shuffle_ps(vector3, vector3, _MM_SHUFFLE(0, 0, 0, 3))) 
+            ;
+        }
+    }
 
-    //Third resulting colum
-    __m128 c3_temp = _mm_mul_ps (row1_A,  colum3_B);
-    __m128 c3_temp2 = _mm_mul_ps (row2_A, colum3_B);
-    __m128 c3_temp3 = _mm_mul_ps (row3_A, colum3_B);
-    __m128 c3_temp4 = _mm_mul_ps (row4_A, colum3_B);
+    //Print the matrix in a stylish way
+    printf("The resulting matrix is:  \n");
+    for (int i = 0; i <4 ; i++) {
+        printf("    %f", c[i][0]); 
+        for (int j = 1; j < 4; j++){
+            printf(", %f", c[i][j]);
+        }
+        printf("\n");
+        
+    }
 
-    //Fourth resulting colum
-    __m128 c4_temp = _mm_mul_ps (row1_A,  colum4_B);
-    __m128 c4_temp2 = _mm_mul_ps (row2_A, colum4_B);
-    __m128 c4_temp3 = _mm_mul_ps (row3_A, colum4_B);
-    __m128 c4_temp4 = _mm_mul_ps (row4_A, colum4_B);
-    
-
-    //Print first row
-    printf("%f, ",__mm_extract_ps(c1_temp,0));
-    printf("%f, ", __mm_extract_ps(c2_temp,0));
-    printf("%f, ", __mm_extract_ps(c3_temp,0));
-    printf("%f \n",__mm_extract_ps(c2_temp,0));
-
-    //Print second row
-    printf("%f, ", __mm_extract_ps(c1_temp2,0));
-    printf("%f, ", __mm_extract_ps(c2_temp2,0));
-    printf("%f, ", __mm_extract_ps(c3_temp2,0));
-    printf("%f \n",__mm_extract_ps(c2_temp2,0));
-
-    //Print third row
-    printf("%f, ",  __mm_extract_ps(c1_temp3,0));
-    printf("%f, ",  __mm_extract_ps(c2_temp3,0));
-    printf("%f, ",  __mm_extract_ps(c3_temp3,0));
-    printf("%f \n", __mm_extract_ps(c2_temp3,0));
-
-    //Print fourth row
-    printf("%f, ",  __mm_extract_ps(c1_temp4,0));
-    printf("%f, ",  __mm_extract_ps(c2_temp4,0));
-    printf("%f, ",  __mm_extract_ps(c3_temp4,0));
-    printf("%f \n", __mm_extract_ps(c2_temp4,0));
-
+    return 0;
 }

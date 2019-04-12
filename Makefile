@@ -1,28 +1,25 @@
 CFLAGS= -msse4 -msse2 
-HELLO= hello
-MAX= maxVal
-#MULT= matMult
 
 
 all: 
 	make hello
-	make max
-	#make mult
+	make maxVal
+	make matMult
 	@echo "All Executables Ready. Run them using ./<exec_name>"
 
 hello:
-	$(CC) $(HELLO)_simd.c -o $(HELLO)
+	$(CC) hello_simd.c -o hello $(CFLAGS)
 	@echo "hello Ready"
 
-max:
-	$(CC) $(MAX)_simd.c -o $(MAX)
+maxVal:
+	$(CC) maxVal_simd.c -o maxVal $(CFLAGS)
 	@echo "maxVal Ready"
 
-#mult:
-#	$(CC) $(MULT)_simd.c -o $(MULT) $(CFLAGS)
-#	@echo "mult Ready"
+matMult:
+	$(CC) matMult_simd.c -o matMult $(CFLAGS)
+	@echo "mult Ready"
 
 
 clean:
-	rm $(HELLO) $(MAX) $(MULT)
+	rm hello maxVal matMult
 	@echo "Executables removed"
